@@ -5,10 +5,46 @@ import { supabase } from '../lib/supabaseClient';
 import { Card, CardContent, Input, Button, Alert } from '../components/ui';
 import { useAuth } from '../lib/auth';
 
+// Hook para desabilitar clique direito
+const useDisableRightClick = () => {
+  useEffect(() => {
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+      return false;
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Desabilitar F12, Ctrl+Shift+I, Ctrl+U, etc.
+      if (
+        e.key === 'F12' ||
+        (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+        (e.ctrlKey && e.shiftKey && e.key === 'J') ||
+        (e.ctrlKey && e.shiftKey && e.key === 'C') ||
+        (e.ctrlKey && e.key === 'u') ||
+        (e.ctrlKey && e.key === 's')
+      ) {
+        e.preventDefault();
+        return false;
+      }
+    };
+
+    document.addEventListener('contextmenu', handleContextMenu);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('contextmenu', handleContextMenu);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+};
+
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated, user } = useAuth();
+
+  // Desabilitar clique direito e atalhos de desenvolvedor
+  useDisableRightClick();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,21 +54,8 @@ export default function Login() {
 
   // Redirecionamento após login bem-sucedido
   useEffect(() => {
-    console.log('🔍 DEBUG Login useEffect:', {
-      isLoginSuccessful,
-      isAuthenticated,
-      hasUser: !!user,
-      userRole: user?.role,
-      locationFrom: location.state?.from?.pathname
-    });
-    
     if (isLoginSuccessful && isAuthenticated && user) {
-      console.log('✅ DEBUG Login: Login confirmado, preparando redirecionamento...');
-      console.log(`👤 DEBUG Login: Usuário autenticado - Email: ${user.email}, Role: ${user.role}`);
-      
       const from = location.state?.from?.pathname || '/';
-      console.log(`➡️ DEBUG Login: Redirecionando para: ${from}`);
-      
       navigate(from, { replace: true });
     }
   }, [isLoginSuccessful, isAuthenticated, user, navigate, location.state]);
@@ -41,52 +64,36 @@ export default function Login() {
     e.preventDefault();
     if (loading) return; // Previne múltiplos cliques
 
-    console.log('🔐 DEBUG Login: Iniciando processo de login...');
-    console.log('📧 DEBUG Login: Email:', email);
-    console.log('🔄 DEBUG Login: Estado atual - isAuthenticated:', isAuthenticated, 'user:', user);
+    // Iniciar processo de login
 
     setError('');
     setLoading(true);
 
     try {
-      console.log('🚀 DEBUG Login: Chamando supabase.auth.signInWithPassword...');
       const { error: signInError, data } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      console.log('📦 DEBUG Login: Resposta do signInWithPassword:', {
-        hasError: !!signInError,
-        hasSession: !!data?.session,
-        hasUser: !!data?.user,
-        userId: data?.user?.id
-      });
-
       if (signInError) {
-        console.error('❌ DEBUG Login: Erro no signInWithPassword:', signInError);
+        console.error('❌ Erro no login:', signInError.message);
         throw signInError;
       }
-      
-      console.log('✅ DEBUG Login: Login bem-sucedido! Aguardando AuthProvider...');
       
       // Marcar login como bem-sucedido para ativar o redirecionamento
       setIsLoginSuccessful(true);
       
       // Aguardar um pouco para o AuthProvider processar antes de resetar loading
       setTimeout(() => {
-        console.log('🔍 DEBUG Login: Verificando estado após 1 segundo...');
-        console.log('📊 DEBUG Login: isAuthenticated:', isAuthenticated, 'user:', user);
-        
         // Se após 1 segundo ainda não redirecionou, resetar loading
         // Isso evita que o botão fique travado indefinidamente
         if (!isAuthenticated || !user) {
-          console.log('⚠️ DEBUG Login: AuthProvider ainda não processou, resetando loading...');
           setLoading(false);
         }
       }, 1000);
 
     } catch (err: any) {
-      console.error("❌ DEBUG Login: Erro capturado:", err.message);
+      console.error("❌ Erro no login:", err.message);
       setError(err.message || 'Ocorreu um erro inesperado.');
       setLoading(false); // Resetar loading em caso de erro
       setIsLoginSuccessful(false); // Resetar flag de sucesso

@@ -74,9 +74,7 @@ const paymentWebhookWorker = new Worker<PaymentWebhookJobData>(
 
     // Verificar se temos os dados necessários
     if (!payload.customer_email || !payload.customer_name) {
-      console.error(`❌ Dados de cliente ausentes no payload`);
-      console.error(`❌ Customer Email: ${payload.customer_email}`);
-      console.error(`❌ Customer Name: ${payload.customer_name}`);
+      console.error(`❌ Dados de cliente ausentes no payload para ID: ${payload.id}`);
       throw new Error('Dados de cliente ausentes no payload');
     }
 
@@ -92,29 +90,12 @@ const paymentWebhookWorker = new Worker<PaymentWebhookJobData>(
 
     // Validação permissiva: qualquer indicação de endereço é suficiente
     const hasAnyAddress = !!(shippingStreet || customerStreet || shippingAddress || customerAddress);
-
-    console.log(`📦 🔍 DEBUG ADDRESS - Validação múltipla:`);
-    console.log(`📦 🔍 DEBUG ADDRESS - Shipping Street: "${shippingStreet}"`);
-    console.log(`📦 🔍 DEBUG ADDRESS - Customer Street: "${customerStreet}"`);
-    console.log(`📦 🔍 DEBUG ADDRESS - Shipping Address: "${shippingAddress}"`);
-    console.log(`📦 🔍 DEBUG ADDRESS - Customer Address: "${customerAddress}"`);
-    console.log(`📦 🔍 DEBUG ADDRESS - Has Any Address: ${hasAnyAddress}`);
-
-    console.log(`📦 🔍 DEBUG ADDRESS - Verificando endereço de entrega:`);
-    console.log(`📦 🔍 DEBUG ADDRESS - Payload completo:`, JSON.stringify(payload, null, 2));
-    console.log(`📦 🔍 DEBUG ADDRESS - Shipping Street: ${shippingStreet}`);
-    console.log(`📦 🔍 DEBUG ADDRESS - Customer Street: ${customerStreet}`);
     // Remover linha duplicada
 
     // ✅ CORREÇÃO: Salvar TODOS os pedidos pagos, independente do endereço
     if (!hasAnyAddress) {
       console.log(`⚠️ Pedido sem endereço de entrega - salvando mesmo assim`);
-      console.log(`📦 CPF e telefone serão extraídos e salvos normalmente`);
     }
-
-    // Extrair endereço para logs
-    const address = payload.shipping?.address || payload.customer?.address;
-    console.log(`🏷️ Endereço extraído:`, address);
 
     // Verificar se o produto é físico (não é do tipo "info")
     let isPhysicalProduct = true; // Assume que é produto físico por padrão
@@ -186,24 +167,20 @@ const paymentWebhookWorker = new Worker<PaymentWebhookJobData>(
       trackingUrl = `${baseUrl}/tracking/${trackingCode}`;
     }
 
-    // Registrar informações do pagamento confirmado
-    console.log(`💰 Pagamento confirmado:`, {
-      paymentId: payload.id,
-      orderId: payload.order_id,
-      trackingCode,
-      status: 'paid'
-    });
+    // Registrar informações do pagamento confirmado (sem dados pessoais)
+    console.log(`💰 Pagamento confirmado: ${payload.id}, Order: ${payload.order_id || 'N/A'}`);
 
     // Extrair dados do cliente usando a lógica já existente
-    console.log(`📦 🔍 DEBUG PAYLOAD - Payload completo:`, JSON.stringify(payload, null, 2));
     const customerData = GatewayUtils.extractCustomerInfo(payload);
-    console.log(`📦 🔍 DEBUG CUSTOMER DATA - Extraído: phone=${customerData?.phone}, cpf=${customerData?.document}`);
 
     // Log detalhado para debug
     if (!customerData?.phone && !customerData?.document) {
       console.log(`⚠️ AVISO: Nenhum dado de CPF/telefone encontrado no payload!`);
       console.log(`   Verifique se o webhook está enviando dados de customer.phone, customer.cpf, etc.`);
     }
+
+    // Extrair endereço para salvar no pedido
+    const address = payload.shipping?.address || payload.customer?.address;
 
     // Salvar o pedido no Supabase
     const orderData = {
@@ -225,12 +202,6 @@ const paymentWebhookWorker = new Worker<PaymentWebhookJobData>(
       updated_at: new Date().toISOString()
     };
 
-    console.log(`📦 🔍 DEBUG SAVE - Dados sendo salvos:`, {
-      customer_phone: orderData.customer_phone,
-      customer_cpf: orderData.customer_cpf,
-      has_shipping_address: orderData.has_shipping_address
-    });
-
     try {
       const { error } = await supabaseAdmin
         .from('orders')
@@ -238,7 +209,6 @@ const paymentWebhookWorker = new Worker<PaymentWebhookJobData>(
 
       if (!error) {
         console.log(`✅ Pedido salvo no Supabase com sucesso!`);
-        console.log(`📦 🔍 DEBUG SAVE - has_shipping_address: ${hasAnyAddress}`);
       }
     } catch (err) {
       console.error(`Erro ao salvar pedido no Supabase:`, err);

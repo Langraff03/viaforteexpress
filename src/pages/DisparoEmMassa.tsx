@@ -402,7 +402,7 @@ const getSampleData = () => {
       };
 
       console.log('📝 [SISTEMA ATUAL] Salvando campanha no banco...');
-      const webhookServerUrl = import.meta.env.VITE_WEBHOOK_SERVER_URL || 'https://fastlogexpress.ngrok.app';
+      const webhookServerUrl = import.meta.env.VITE_WEBHOOK_SERVER_URL || 'http://localhost:3001';
       console.log('🔍 [DEBUG] Webhook Server URL:', webhookServerUrl);
       const campaignResponse = await fetch(`${webhookServerUrl}/api/lead-campaigns`, {
         method: 'POST',

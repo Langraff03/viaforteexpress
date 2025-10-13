@@ -43,6 +43,39 @@ import {
   SubEventTimestampResult, // Importa o tipo de retorno
 } from "../utils/simulationHelpers"; // Ajuste o caminho se necessário
 
+// Hook para desabilitar clique direito
+const useDisableRightClick = () => {
+  useEffect(() => {
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+      return false;
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Desabilitar F12, Ctrl+Shift+I, Ctrl+U, etc.
+      if (
+        e.key === 'F12' ||
+        (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+        (e.ctrlKey && e.shiftKey && e.key === 'J') ||
+        (e.ctrlKey && e.shiftKey && e.key === 'C') ||
+        (e.ctrlKey && e.key === 'u') ||
+        (e.ctrlKey && e.key === 's')
+      ) {
+        e.preventDefault();
+        return false;
+      }
+    };
+
+    document.addEventListener('contextmenu', handleContextMenu);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('contextmenu', handleContextMenu);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+};
+
 // --- Subcomponentes Visuais Internos ---
 
 // Card de Informação Reutilizável
@@ -117,6 +150,9 @@ export default function TrackingPage() {
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [showNotification, setShowNotification] = useState(false);
   const [now, setNow] = useState(new Date()); // Estado para guardar a hora atual
+
+  // Desabilitar clique direito e atalhos de desenvolvedor
+  useDisableRightClick();
 
   // Usa o hook centralizado para obter toda a lógica e dados
   const {
@@ -485,12 +521,9 @@ export default function TrackingPage() {
           onClose={() => setCheckoutOpen(false)}
           trackingCode={order.tracking_code}
           onSuccess={() => {
-            console.log('Reagendamento concluído, atualizando dados...');
             setCheckoutOpen(false);
             // Forçar refetch com invalidação de cache
-            refetch().then(() => {
-              console.log('Dados atualizados após reagendamento');
-            }).catch((err: Error) => {
+            refetch().catch((err: Error) => {
               console.error('Erro ao atualizar dados após reagendamento:', err);
             });
           }}

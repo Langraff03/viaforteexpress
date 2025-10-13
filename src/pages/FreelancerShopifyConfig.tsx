@@ -23,7 +23,7 @@ export default function FreelancerShopifyConfig() {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  const webhookUrl = `https://fastlogexpress.ngrok.app/webhook/shopify?client_id=${user?.id}`;
+  const webhookUrl = `${import.meta.env.VITE_WEBHOOK_SERVER_URL || 'http://localhost:3001'}/webhook/shopify?client_id=${user?.id}`;
 
   useEffect(() => {
     if (!user?.id) return;

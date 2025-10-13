@@ -1,0 +1,493 @@
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { X, Package, Loader2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../../lib/auth';
+import { generateUniqueTrackingCode, generateTrackingLink } from '../../lib/api';
+import { supabaseAdmin } from '../../lib/supabaseClient';
+import { OrderItem } from '../../types';
+import SuccessModal from './SuccessModal';
+
+interface NewOrderModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+interface OrderFormData {
+  customer_name: string;
+  customer_email: string;
+  city?: string;
+  state?: string;
+  amount?: number;
+  isManualOrder: boolean;
+  // Campos do produto
+  product_name: string;
+  product_description?: string;
+  product_category?: string;
+  product_brand?: string;
+  quantity: number;
+  unit_price?: number;
+}
+
+export function NewOrderModal({ isOpen, onClose, onSuccess }: NewOrderModalProps) {
+  const { user } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [createdOrder, setCreatedOrder] = useState<{
+    tracking_code: string;
+    tracking_link: string;
+    customer_name: string;
+  } | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    reset,
+    formState: { errors }
+  } = useForm<OrderFormData>({
+    defaultValues: {
+      isManualOrder: true,
+      amount: 0,
+      product_name: 'Serviço de Transporte',
+      product_description: 'Serviço de logística e transporte',
+      product_category: 'logistica',
+      product_brand: '',
+      quantity: 1,
+      unit_price: 0
+    }
+  });
+
+  const isManualOrder = watch('isManualOrder');
+
+  const onSubmit = async (data: OrderFormData) => {
+    if (!user) {
+      alert('Usuário não autenticado');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Gerar código de rastreio único
+      const trackingCode = await generateUniqueTrackingCode();
+      const trackingLink = generateTrackingLink(trackingCode);
+
+      // Preparar dados do pedido
+      const orderData = {
+        tracking_code: trackingCode,
+        customer_name: data.customer_name,
+        customer_email: data.customer_email,
+        city: data.city || null,
+        state: data.state || null,
+        amount: data.isManualOrder ? (data.amount ? data.amount * 100 : 0) : 0, // Converter para centavos, 0 se não informado
+        status: 'created', // Status padrão conforme schema
+        payment_status: data.isManualOrder ? 'manual' : null,
+        payment_id: data.isManualOrder ? `manual_${Date.now()}` : null,
+        external_id: `manual_${Date.now()}`, // ID externo para pedidos manuais
+        client_id: user.client_id || '0ec3137d-ee68-4aba-82de-143b3c61516a', // Cliente padrão se não disponível
+        gateway_id: '7e7e93d9-fc1a-4ae0-b7ab-775494d57cad', // Gateway padrão para pedidos manuais
+        redelivery_count: 0
+      };
+
+      console.log('Criando pedido manual:', orderData);
+
+      // Inserir pedido no banco
+      const { data: insertedOrder, error } = await supabaseAdmin
+        .from('orders')
+        .insert([orderData])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Erro ao criar pedido:', error);
+        throw new Error(`Erro ao criar pedido: ${error.message}`);
+      }
+
+      console.log('Pedido criado com sucesso:', insertedOrder);
+
+      // Criar order_item para o produto
+      const unitPrice = data.isManualOrder && data.amount ?
+        Math.round((data.amount * 100) / data.quantity) : 0;
+      const totalPrice = unitPrice * data.quantity;
+
+      const orderItem: OrderItem = {
+        order_id: insertedOrder.id,
+        product_name: data.product_name,
+        product_description: data.product_description,
+        product_category: data.product_category,
+        product_brand: data.product_brand,
+        quantity: data.quantity,
+        unit_price: unitPrice,
+        total_price: totalPrice,
+        webhook_data: { manual_order: true, created_by: user.id }
+      };
+
+      console.log('Criando order_item:', orderItem);
+
+      const { data: insertedOrderItem, error: orderItemError } = await supabaseAdmin
+        .from('order_items')
+        .insert([orderItem])
+        .select()
+        .single();
+
+      if (orderItemError) {
+        console.error('Erro ao criar order_item:', orderItemError);
+        throw new Error(`Erro ao criar item do pedido: ${orderItemError.message}`);
+      }
+
+      console.log('Order item criado com sucesso:', insertedOrderItem);
+
+      // Enfileirar email via API do webhook-server
+      try {
+        console.log('📧 Enfileirando email de rastreamento...');
+        const webhookServerUrl = import.meta.env.VITE_WEBHOOK_SERVER_URL || 'http://localhost:3001';
+        
+        const emailResponse = await fetch(`${webhookServerUrl}/api/email/queue`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            to: data.customer_email,
+            subject: `📦 Pedido ${trackingCode} - FROTA EXPRESS`,
+            context: {
+              order_id: insertedOrder.id,
+              customerName: data.customer_name,
+              trackingCode: trackingCode,
+              trackingUrl: `https://rastreio.frotaexpress.com/tracking/${trackingCode}`,
+            },
+          }),
+        });
+
+        if (!emailResponse.ok) {
+          throw new Error(`API de email retornou: ${emailResponse.status}`);
+        }
+
+        const emailResult = await emailResponse.json();
+        console.log('✅ Email enfileirado com sucesso!', emailResult);
+        setEmailSent(true);
+        setEmailError(null);
+      } catch (emailErr) {
+        console.error('❌ Erro ao enfileirar email:', emailErr);
+        setEmailSent(false);
+        setEmailError(emailErr instanceof Error ? emailErr.message : 'Erro ao enviar email');
+      }
+
+      // Configurar dados para o modal de sucesso
+      setCreatedOrder({
+        tracking_code: trackingCode,
+        tracking_link: trackingLink,
+        customer_name: data.customer_name
+      });
+
+      // Resetar formulário
+      reset();
+
+      // Mostrar modal de sucesso
+      setShowSuccessModal(true);
+
+    } catch (error) {
+      console.error('Erro ao criar pedido:', error);
+      alert(error instanceof Error ? error.message : 'Erro ao criar pedido');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSuccessModalClose = () => {
+    setShowSuccessModal(false);
+    setCreatedOrder(null);
+    setEmailSent(false);
+    setEmailError(null);
+    onClose();
+    onSuccess(); // Atualizar lista de pedidos
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+            onClick={onClose}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between p-6 border-b">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-indigo-100 rounded-lg">
+                    <Package className="w-5 h-5 text-indigo-600" />
+                  </div>
+                  <h2 className="text-xl font-semibold">Novo Pedido Manual</h2>
+                </div>
+                <button
+                  onClick={onClose}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
+                {/* Tipo de Pedido */}
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      {...register('isManualOrder')}
+                      className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <span className="text-sm font-medium text-blue-800">
+                      Pedido Manual (sem pagamento obrigatório)
+                    </span>
+                  </label>
+                  <p className="text-xs text-blue-600 mt-1">
+                    Para clientes "x1" ou pedidos especiais
+                  </p>
+                </div>
+
+                {/* Nome do Cliente */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Nome do Cliente *
+                  </label>
+                  <input
+                    type="text"
+                    {...register('customer_name', { 
+                      required: 'Nome é obrigatório',
+                      minLength: { value: 2, message: 'Nome deve ter pelo menos 2 caracteres' }
+                    })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="Digite o nome completo"
+                  />
+                  {errors.customer_name && (
+                    <p className="text-red-500 text-xs mt-1">{errors.customer_name.message}</p>
+                  )}
+                </div>
+
+                {/* Email do Cliente */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email do Cliente *
+                  </label>
+                  <input
+                    type="email"
+                    {...register('customer_email', { 
+                      required: 'Email é obrigatório',
+                      pattern: {
+                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                        message: 'Email inválido'
+                      }
+                    })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="cliente@email.com"
+                  />
+                  {errors.customer_email && (
+                    <p className="text-red-500 text-xs mt-1">{errors.customer_email.message}</p>
+                  )}
+                </div>
+
+                {/* Campos Opcionais */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Cidade (opcional)
+                    </label>
+                    <input
+                      type="text"
+                      {...register('city')}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                      placeholder="São Paulo"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Estado (opcional)
+                    </label>
+                    <input
+                      type="text"
+                      {...register('state')}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                      placeholder="SP"
+                      maxLength={2}
+                    />
+                  </div>
+                </div>
+
+                {/* Seção do Produto */}
+                <div className="border-t pt-4">
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Informações do Produto</h3>
+                  
+                  {/* Nome do Produto */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Nome do Produto *
+                    </label>
+                    <input
+                      type="text"
+                      {...register('product_name', {
+                        required: 'Nome do produto é obrigatório',
+                        minLength: { value: 2, message: 'Nome deve ter pelo menos 2 caracteres' }
+                      })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                      placeholder="Ex: Camiseta de time seleção"
+                    />
+                    {errors.product_name && (
+                      <p className="text-red-500 text-xs mt-1">{errors.product_name.message}</p>
+                    )}
+                  </div>
+
+                  {/* Descrição do Produto */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Descrição (opcional)
+                    </label>
+                    <textarea
+                      {...register('product_description')}
+                      rows={2}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                      placeholder="Descrição detalhada do produto"
+                    />
+                  </div>
+
+                  {/* Categoria e Marca */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Categoria
+                      </label>
+                      <select
+                        {...register('product_category')}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                      >
+                        <option value="logistica">Logística</option>
+                        <option value="roupas">Roupas</option>
+                        <option value="acessorios">Acessórios</option>
+                        <option value="eletronicos">Eletrônicos</option>
+                        <option value="casa">Casa e Decoração</option>
+                        <option value="outros">Outros</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Marca (opcional)
+                      </label>
+                      <input
+                        type="text"
+                        {...register('product_brand')}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="Ex: Nike, Adidas"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Quantidade */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Quantidade *
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      {...register('quantity', {
+                        required: 'Quantidade é obrigatória',
+                        min: { value: 1, message: 'Quantidade deve ser pelo menos 1' }
+                      })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                      placeholder="1"
+                    />
+                    {errors.quantity && (
+                      <p className="text-red-500 text-xs mt-1">{errors.quantity.message}</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Valor (condicional) */}
+                {isManualOrder && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Valor (opcional)
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-2 text-gray-500">R$</span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        {...register('amount', { 
+                          min: { value: 0, message: 'Valor deve ser positivo' }
+                        })}
+                        className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="0,00"
+                      />
+                    </div>
+                    {errors.amount && (
+                      <p className="text-red-500 text-xs mt-1">{errors.amount.message}</p>
+                    )}
+                    <p className="text-xs text-gray-500 mt-1">
+                      Deixe em branco ou 0 para pedidos sem valor
+                    </p>
+                  </div>
+                )}
+
+                {/* Botões */}
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+                    disabled={isSubmitting}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Criando...
+                      </>
+                    ) : (
+                      'Criar Pedido'
+                    )}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal de Sucesso */}
+      {showSuccessModal && createdOrder && (
+        <SuccessModal
+          isOpen={showSuccessModal}
+          onClose={handleSuccessModalClose}
+          trackingCode={createdOrder.tracking_code}
+          trackingLink={createdOrder.tracking_link}
+          customerName={createdOrder.customer_name}
+          onViewOrders={handleSuccessModalClose}
+          emailSent={emailSent}
+          emailError={emailError}
+        />
+      )}
+    </>
+  );
+}

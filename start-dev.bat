@@ -1,0 +1,6 @@
+@echo off
+echo Parando servidores Vite em execucao...
+taskkill /F /IM node.exe /T 2>nul
+
+echo Iniciando servidor na porta 3001...
+npm run dev:port

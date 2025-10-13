@@ -1,0 +1,12 @@
+// tsconfig.webhook.json
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist/webhook-server"
+  },
+  "include": [
+    "src/webhook-server/**/*",
+    "src/lib/**/*",
+    "src/types/**/*"
+  ]
+}

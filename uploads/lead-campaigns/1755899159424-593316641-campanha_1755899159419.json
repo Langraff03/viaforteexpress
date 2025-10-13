@@ -1,0 +1,47 @@
+[
+  {
+    "nome": "João Silva",
+    "email": "joao@email.com",
+    "telefone": "(11) 99999-1111"
+  },
+  {
+    "nome": "Maria Santos",
+    "email": "maria@gmail.com"
+  },
+  {
+    "nome": "Carlos Oliveira",
+    "email": "carlos@hotmail.com",
+    "empresa": "Tech Corp"
+  },
+  {
+    "nome": "Ana Costa",
+    "email": "ana@outlook.com"
+  },
+  {
+    "nome": "Pedro Lima",
+    "email": "pedro@yahoo.com.br",
+    "telefone": "(21) 88888-2222"
+  },
+  {
+    "nome": "Juliana Ferreira",
+    "email": "juliana@uol.com.br"
+  },
+  {
+    "nome": "Ricardo Alves",
+    "email": "ricardo@empresa.com",
+    "cargo": "Gerente"
+  },
+  {
+    "nome": "Fernanda Rocha",
+    "email": "fernanda@gmail.com"
+  },
+  {
+    "nome": "Lucas Martins",
+    "email": "lucas@protonmail.com"
+  },
+  {
+    "nome": "Camila Souza",
+    "email": "camila@gmail.com",
+    "idade": 28
+  }
+]

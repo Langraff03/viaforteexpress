@@ -1,0 +1,32 @@
+[
+  {
+    "nome": "Kaimi Suya",
+    "email": "kaimi.suya674@folha.com.br",
+
+  },
+  {
+    "nome": "Carlos Barbosa Ferreira", 
+    "email": "carlosbarbosaferreira463@yahoo.com.br",
+    "telefone": "11987654321",
+    "cpf": "17115361487"
+  },
+  {
+    "nome": "Pedro Roberto Silveira",
+    "email": "26361115739@gmail.com",
+    "empresa": "Empresa ABC",
+    "cpf": "86860819204"
+  },
+  {
+    "nome": "Maria Silva",
+    "email": "maria@teste.com",
+    "empresa": "Teste Ltda",
+    "telefone": "11999888777"
+  },
+  {
+    "nome": "João Santos",
+    "email": "joao@exemplo.com",
+    "cpf": "12345678900",
+    "telefone": "11555444333",
+    "empresa": "Santos & Cia"
+  }
+]

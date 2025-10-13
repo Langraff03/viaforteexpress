@@ -17,19 +17,12 @@ export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   loading: true, // Começa como true até que o AuthProvider defina o estado
   setUser: (user) => {
-    console.log('🔵 DEBUG AuthStore: Setting user:', user ? {
-      email: user.email,
-      role: user.role,
-      id: user.id
-    } : 'null');
     set({ user, loading: false });
   },
   setLoading: (loading) => {
-    console.log('🔄 DEBUG AuthStore: Setting loading:', loading);
     set({ loading });
   },
   signOut: async () => {
-    console.log('👋 DEBUG AuthStore: Signing out.');
     await supabase.auth.signOut();
     set({ user: null, loading: false });
   },

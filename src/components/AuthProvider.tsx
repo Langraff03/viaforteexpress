@@ -17,14 +17,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     initialized.current = true;
     
-    console.log('🔵 DEBUG AuthProvider: Inicializando...');
     setLoading(true);
 
     const handleUserSession = async (session: Session | null) => {
-      console.log('🔍 DEBUG AuthProvider: handleUserSession chamado com sessão:', !!session);
       try {
         if (!session?.user) {
-          console.log("⚪ DEBUG AuthProvider: Nenhuma sessão encontrada. Usuário deslogado.");
           setUser(null);
           return;
         }
@@ -39,7 +36,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (profileError) throw new Error(`Erro ao buscar perfil: ${profileError.message}`);
         if (!profile) throw new Error(`Perfil não encontrado para o usuário ${session.user.id}.`);
         
-        console.log("AuthProvider V5: Perfil base encontrado.");
 
         let clientName: string | null = null;
         if (profile.client_id) {
@@ -67,13 +63,6 @@ const userData: User = {
     gatewayType,
 };
 
-console.log("🔵 DEBUG AuthProvider: Usuário final montado:", {
-  email: userData.email,
-  role: userData.role,
-  client_id: userData.client_id,
-  gateway_id: userData.gateway_id
-});
-console.log(`🎯 DEBUG AuthProvider: Role do usuário é: ${userData.role}`);
         setUser(userData);
         setLoading(false); // Só define loading=false APÓS o userData completo estar pronto
         
@@ -90,32 +79,17 @@ console.log(`🎯 DEBUG AuthProvider: Role do usuário é: ${userData.role}`);
     
     // Verificar sessão inicial
     supabase.auth.getSession().then(({ data: { session }, error }) => {
-      console.log('📦 DEBUG AuthProvider: Sessão inicial:', {
-        hasSession: !!session,
-        hasError: !!error,
-        userId: session?.user?.id
-      });
-      
       if (!error && session) {
         // Se há sessão, handleUserSession vai definir loading=false após carregar perfil
         handleUserSession(session);
       } else {
         // Se não há sessão ou há erro, define loading=false imediatamente
-        console.log('❌ DEBUG AuthProvider: Sem sessão inicial ou erro:', error?.message);
         setLoading(false);
       }
     });
     
     // Simplificando o listener para tratar todos os eventos relevantes que trazem uma sessão.
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log(`🎯 DEBUG AuthProvider: Evento de auth recebido - ${event}`);
-      console.log('📊 DEBUG AuthProvider: Detalhes do evento:', {
-        event,
-        hasSession: !!session,
-        userId: session?.user?.id,
-        userEmail: session?.user?.email
-      });
-      
       // Só processar se for um evento relevante
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
         handleUserSession(session);

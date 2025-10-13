@@ -5,35 +5,35 @@ import { supabase } from '../lib/supabaseClient';
 import { Card, CardContent, Input, Button, Alert } from '../components/ui';
 import { useAuth } from '../lib/auth';
 
-// Hook para desabilitar clique direito
+// Hook para desabilitar clique direito e atalhos de desenvolvedor
 const useDisableRightClick = () => {
   useEffect(() => {
     const handleContextMenu = (e: MouseEvent) => {
       e.preventDefault();
+      e.stopPropagation();
       return false;
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Desabilitar F12, Ctrl+Shift+I, Ctrl+U, etc.
+      // Desabilitar F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C, Ctrl+U, Ctrl+S
       if (
         e.key === 'F12' ||
-        (e.ctrlKey && e.shiftKey && e.key === 'I') ||
-        (e.ctrlKey && e.shiftKey && e.key === 'J') ||
-        (e.ctrlKey && e.shiftKey && e.key === 'C') ||
-        (e.ctrlKey && e.key === 'u') ||
-        (e.ctrlKey && e.key === 's')
+        (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
+        (e.ctrlKey && (e.key === 'u' || e.key === 's'))
       ) {
         e.preventDefault();
+        e.stopPropagation();
         return false;
       }
     };
 
-    document.addEventListener('contextmenu', handleContextMenu);
-    document.addEventListener('keydown', handleKeyDown);
+    // Adicionar listeners com capture para garantir que sejam executados primeiro
+    document.addEventListener('contextmenu', handleContextMenu, true);
+    document.addEventListener('keydown', handleKeyDown, true);
 
     return () => {
-      document.removeEventListener('contextmenu', handleContextMenu);
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('contextmenu', handleContextMenu, true);
+      document.removeEventListener('keydown', handleKeyDown, true);
     };
   }, []);
 };

@@ -41,4 +41,4 @@ ENV PORT=3001
 EXPOSE 3001
 
 # Comando para iniciar o servidor
-CMD ["node", "dist/webhook-server/index.js"]
+CMD ["node", "dist/src/webhook-server/index.js"]

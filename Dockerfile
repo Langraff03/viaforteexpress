@@ -10,22 +10,25 @@ RUN npm ci
 # Copia o código-fonte
 COPY . .
 
-# Executa o build (cria a pasta 'dist')
-RUN npm run build
+# Executa o build
+RUN npm run build:webhook
 
 # --- STAGE 2: PRODUCTION ---
 FROM node:18-alpine
 
 WORKDIR /app
 
-# Copia apenas os arquivos necessários para rodar
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/node_modules ./node_modules
+# Instala apenas as dependências de produção
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Copia os arquivos compilados
 COPY --from=builder /app/dist ./dist
 
-# Ambiente e porta
+# Define variáveis de ambiente
 ENV NODE_ENV=production
+ENV PORT=3001
 EXPOSE 3001
 
-# Comando padrão (será sobrescrito pelo Railway)
+# Comando para iniciar o servidor
 CMD ["node", "dist/webhook-server/index.js"]

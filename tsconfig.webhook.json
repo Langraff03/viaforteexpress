@@ -3,18 +3,26 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src",
-    "module": "CommonJS",
-    "target": "ES2020",
+    "module": "ES2022",
+    "target": "ES2022",
     "esModuleInterop": true,
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "strict": true
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "strict": true,
+    "types": ["vite/client", "node"],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
   "include": [
     "src/webhook-server/**/*",
     "src/lib/**/*",
     "src/types/**/*",
-    "src/routes/**/*"
+    "src/routes/**/*",
+    "src/emails/**/*",
+    "src/utils/**/*"
   ]
 }

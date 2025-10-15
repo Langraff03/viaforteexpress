@@ -3,14 +3,22 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# Copia e instala dependências
-COPY package*.json ./
-RUN npm ci
+# Instalar dependências de build
+RUN apk add --no-cache python3 make g++
 
-# Copia o código-fonte
+# Copiar package.json e package-lock.json
+COPY package*.json ./
+
+# Instalar todas as dependências (incluindo devDependencies)
+RUN npm install
+
+# Copiar código fonte
 COPY . .
 
-# Executa o build
+# Instalar tipos adicionais necessários
+RUN npm install --save-dev @types/react @types/node
+
+# Executar build
 RUN npm run build:webhook
 
 # --- STAGE 2: PRODUCTION ---
@@ -18,14 +26,16 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Instala apenas as dependências de produção
+# Copiar package.json e package-lock.json
 COPY package*.json ./
+
+# Instalar apenas dependências de produção
 RUN npm ci --only=production
 
-# Copia os arquivos compilados
+# Copiar arquivos compilados
 COPY --from=builder /app/dist ./dist
 
-# Define variáveis de ambiente
+# Configurar ambiente
 ENV NODE_ENV=production
 ENV PORT=3001
 EXPOSE 3001

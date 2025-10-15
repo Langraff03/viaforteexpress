@@ -11,9 +11,7 @@ RUN npm ci
 COPY . .
 
 # Executa o build (cria a pasta 'dist')
-# Compila webhook e workers
-RUN npm run build:webhook && npm run build:workers
-
+RUN npm run build
 
 # --- STAGE 2: PRODUCTION ---
 FROM node:18-alpine

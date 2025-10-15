@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Script de build específico para Railway
 # Compila apenas os arquivos backend necessários

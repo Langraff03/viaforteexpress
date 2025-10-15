@@ -1,0 +1,3 @@
+@echo off
+echo Iniciando apenas o servidor de webhook...
+npx tsx --watch -r dotenv/config src/webhook-server/index.ts

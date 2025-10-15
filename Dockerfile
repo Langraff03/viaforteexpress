@@ -30,4 +30,4 @@ ENV NODE_ENV=production
 EXPOSE 3001
 
 # Comando padrão (será sobrescrito pelo Railway)
-CMD ["node", "dist/webhook-server/webhook-server/index.js"]
+CMD ["node", "dist/webhook-server/index.js"]

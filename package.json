@@ -2,6 +2,7 @@
   "name": "order-tracking-saas",
   "private": true,
   "version": "0.0.0",
+  "type": "module",
   "scripts": {
     "dev:webhook": "npx tsx --watch -r dotenv/config src/webhook-server/index.ts",
     "dev:payment": "npx tsx --watch -r dotenv/config src/workers/payment.worker.ts",

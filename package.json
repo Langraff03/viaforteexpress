@@ -23,7 +23,7 @@
     "build:clean": "npm run clean && npm run build",
     "build": "npm run build:webhook && npm run build:workers",
     "build:frontend": "tsc -p tsconfig.frontend.json && vite build --config vite.config.frontend.cjs",
-    "build:webhook": "tsc -p tsconfig.webhook.json --jsx react-jsx",
+    "build:webhook": "scripts\\build-railway.bat",
     "build:workers": "tsc -p tsconfig.workers.json",
     "preview": "vite preview",
     "start": "node dist/server.js",

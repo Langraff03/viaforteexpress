@@ -3,8 +3,8 @@
 import { Resend } from 'resend';
 import { renderAsync } from '@react-email/render';
 import { supabaseAdmin } from './server/supabaseAdmin'; // ✅ Backend seguro para workers
-import TrackingEmail from '../emails/TrackingEmail';
-import OfferEmail from '../emails/OfferEmail';
+import TrackingEmail from '../emails/TrackingEmail.backend';
+import OfferEmail from '../emails/OfferEmail.backend';
 import type { EmailDomain, ExtendedEmailConfig, ValidationResponse } from '../types';
 
 export type EmailConfig = {
@@ -16,12 +16,15 @@ export type EmailConfig = {
 
 // Função helper para obter variáveis de ambiente de forma compatível
 function getEnvVar(name: string): string | undefined {
-  // Se estivermos no browser (frontend)
+  // Se estivermos no Node.js (backend/workers) - sempre primeiro
+  if (typeof process !== 'undefined' && process.env) {
+    return process.env[`VITE_${name}`] || process.env[name];
+  }
+  // Se estivermos no browser (frontend) - fallback
   if (typeof window !== 'undefined' && import.meta?.env) {
     return import.meta.env[`VITE_${name}`];
   }
-  // Se estivermos no Node.js (backend/workers)
-  return process.env[`VITE_${name}`] || process.env[name];
+  return undefined;
 }
 
 export async function getEmailConfig(): Promise<EmailConfig> {
@@ -358,11 +361,14 @@ export async function sendOfferEmail(lead: {
 
     const html = await renderAsync(
       <OfferEmail
-        nome={lead.nome}
-        oferta_nome={lead.oferta_nome}
-        desconto={lead.desconto}
-        link_da_oferta={lead.link_da_oferta}
-        descricao_adicional={lead.descricao_adicional}
+        name={lead.nome}
+        productName={lead.oferta_nome}
+        productDescription={lead.descricao_adicional || 'Produto de alta qualidade'}
+        price={lead.desconto ? (parseFloat(lead.desconto) * 1.5).toFixed(2) : '99.90'}
+        discountPrice={lead.desconto || '49.90'}
+        productImage={''}
+        ctaUrl={lead.link_da_oferta}
+        unsubscribeUrl={`${process.env.APP_URL || 'https://viaforteexpress.com'}/unsubscribe`}
       />
     );
 

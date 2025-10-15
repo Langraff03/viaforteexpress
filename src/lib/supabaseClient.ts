@@ -3,8 +3,8 @@ import { createClient } from '@supabase/supabase-js';
 // ✅ CLIENTE FRONTEND SEGURO - Usa apenas ANON_KEY
 // Este arquivo é bundled pelo Vite e exposto publicamente
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
+const supabaseUrl = (import.meta.env?.VITE_SUPABASE_URL || process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL) as string;
+const supabaseAnonKey = (import.meta.env?.VITE_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY) as string;
 
 if (!supabaseUrl || !supabaseAnonKey) {
   console.error('❌ CONFIGURAÇÃO FRONTEND SUPABASE INCOMPLETA:');

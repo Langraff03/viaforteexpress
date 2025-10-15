@@ -1,4 +1,4 @@
-// tsconfig.webhook.json
+// tsconfig.backend.json - Configuração específica para build do Railway
 {
   "compilerOptions": {
     "outDir": "dist",
@@ -22,7 +22,6 @@
     "src/lib/api.ts",
     "src/lib/auth.ts",
     "src/lib/domainHelpers.ts",
-    "src/lib/emailService.tsx",
     "src/lib/gateways/**/*",
     "src/lib/invoiceService.tsx",
     "src/lib/payment.ts",
@@ -40,5 +39,10 @@
     "src/utils/secureData.ts",
     "src/utils/tokenUtils.js",
     "src/utils/validation.js"
+  ],
+  "exclude": [
+    "src/lib/emailService.tsx",
+    "src/lib/supabaseClient.ts",
+    "src/utils/secureLogger.ts"
   ]
 }

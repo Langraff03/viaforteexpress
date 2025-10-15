@@ -18,6 +18,7 @@ npx tsc src/webhook-server/handlers/genericWebhookHandler.ts --outDir dist --mod
 npx tsc src/webhook-server/handlers/asset.ts --outDir dist --module ES2020 --target ES2020 --moduleResolution node --esModuleInterop --skipLibCheck --jsx react-jsx --types node
 npx tsc src/webhook-server/handlers/config.ts --outDir dist --module ES2020 --target ES2020 --moduleResolution node --esModuleInterop --skipLibCheck --jsx react-jsx --types node
 npx tsc src/webhook-server/middleware/validate-webhook.ts --outDir dist --module ES2020 --target ES2020 --moduleResolution node --esModuleInterop --skipLibCheck --jsx react-jsx --types node
+npx tsc src/webhook-server/handlers/shopifyWebhookProcessor.ts --outDir dist --module ES2020 --target ES2020 --moduleResolution node --esModuleInterop --skipLibCheck --jsx react-jsx --types node
 
 # Workers
 echo "  - Compilando workers..."

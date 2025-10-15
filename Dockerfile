@@ -11,8 +11,8 @@ RUN npm ci
 COPY . .
 
 # Executa o build (cria a pasta 'dist')
-# Use o comando que compila tudo (webhook e workers)
-RUN npm run build:webhook
+# Compila webhook e workers
+RUN npm run build:webhook && npm run build:workers
 
 
 # --- STAGE 2: PRODUCTION ---

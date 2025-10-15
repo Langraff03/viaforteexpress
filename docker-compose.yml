@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: node dist/webhook-server/webhook-server/index.js
+    command: node dist/webhook-server/index.js
     ports:
       - "3002:3001"
     environment:

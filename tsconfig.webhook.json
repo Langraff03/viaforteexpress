@@ -2,7 +2,7 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "dist"
+    "outDir": "dist/webhook-server"
   },
   "include": [
     "src/webhook-server/**/*",

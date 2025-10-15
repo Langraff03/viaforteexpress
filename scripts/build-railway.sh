@@ -13,12 +13,7 @@ echo "📦 Compilando arquivos backend..."
 
 REM Webhook server
 echo "  - Compilando webhook-server..."
-npx tsc src/webhook-server/index.ts --outDir dist --module ES2020 --target ES2020 --moduleResolution node --esModuleInterop --skipLibCheck --jsx react-jsx --types node --allowImportingTsExtensions --declaration false
-npx tsc src/webhook-server/handlers/genericWebhookHandler.ts --outDir dist --module ES2020 --target ES2020 --moduleResolution node --esModuleInterop --skipLibCheck --jsx react-jsx --types node --allowImportingTsExtensions --declaration false
-npx tsc src/webhook-server/handlers/asset.ts --outDir dist --module ES2020 --target ES2020 --moduleResolution node --esModuleInterop --skipLibCheck --jsx react-jsx --types node --allowImportingTsExtensions --declaration false
-npx tsc src/webhook-server/handlers/config.ts --outDir dist --module ES2020 --target ES2020 --moduleResolution node --esModuleInterop --skipLibCheck --jsx react-jsx --types node --allowImportingTsExtensions --declaration false
-npx tsc src/webhook-server/middleware/validate-webhook.ts --outDir dist --module ES2020 --target ES2020 --moduleResolution node --esModuleInterop --skipLibCheck --jsx react-jsx --types node --allowImportingTsExtensions --declaration false
-npx tsc src/webhook-server/handlers/shopifyWebhookProcessor.ts --outDir dist --module ES2020 --target ES2020 --moduleResolution node --esModuleInterop --skipLibCheck --jsx react-jsx --types node --allowImportingTsExtensions --declaration false
+npx tsc --project tsconfig.backend.json
 
 # Workers
 echo "  - Compilando workers..."

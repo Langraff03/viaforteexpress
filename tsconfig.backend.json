@@ -13,6 +13,8 @@
     "allowJs": true,
     "strict": true,
     "types": ["node"],
+    "allowImportingTsExtensions": true,
+    "declaration": false,
     "paths": {
       "@/*": ["./src/*"]
     }

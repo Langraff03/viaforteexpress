@@ -417,6 +417,63 @@ export const genericWebhookHandler = async (req: Request, res: Response) => {
               console.error(`[Webhook] ❌ Erro ao enfileirar email:`, queueError);
               console.error(`[DEBUG] Stack trace:`, queueError.stack);
             }
+
+            // ✅ NOVO: Processar fulfillment automático na Shopify
+            console.log(`\n[Webhook] 🔍 Verificando configuração de fulfillment automático...`);
+            
+            if (shopifyConfig.auto_fulfill !== false) {
+              console.log(`[Webhook] ✅ Auto-fulfill ativado, verificando credenciais...`);
+              
+              if (shopifyConfig.shop_url && shopifyConfig.api_access_token) {
+                console.log(`[Webhook] ✅ Credenciais encontradas, iniciando fulfillment...`);
+                console.log(`[Webhook] - Loja: ${shopifyConfig.shop_url}`);
+                console.log(`[Webhook] - Transportadora: ${shopifyConfig.tracking_company || 'Custom'}`);
+                
+                try {
+                  const { processShopifyFulfillment, validateFulfillmentConfig } = await import('../../lib/shopifyFulfillment');
+                  
+                  // Validar configuração
+                  if (!validateFulfillmentConfig(shopifyConfig)) {
+                    console.warn(`[Webhook] ⚠️ Configuração de fulfillment inválida ou incompleta`);
+                  } else {
+                    // Processar fulfillment
+                    const trackingUrl = `${process.env.VITE_APP_URL || 'https://viaforteexpress.com'}/rastreamento/${trackingCode}`;
+                    
+                    const fulfillmentResult = await processShopifyFulfillment({
+                      shopifyOrderId: parseInt(order.id.toString()),
+                      trackingCode: trackingCode,
+                      trackingUrl: trackingUrl,
+                      config: {
+                        shop_url: shopifyConfig.shop_url,
+                        api_access_token: shopifyConfig.api_access_token,
+                        api_version: '2024-01'
+                      },
+                      trackingCompany: shopifyConfig.tracking_company || 'Custom',
+                      lineItems: order.items
+                    });
+                    
+                    if (fulfillmentResult.success) {
+                      console.log(`[Webhook] ✅ Fulfillment criado com sucesso na Shopify!`);
+                      console.log(`[Webhook] - Fulfillment ID: ${fulfillmentResult.fulfillmentId}`);
+                      console.log(`[Webhook] 📧 Shopify enviará email de confirmação ao cliente`);
+                    } else {
+                      console.error(`[Webhook] ❌ Falha ao criar fulfillment: ${fulfillmentResult.error}`);
+                    }
+                  }
+                } catch (fulfillmentError: any) {
+                  console.error(`[Webhook] ❌ Erro ao processar fulfillment:`, fulfillmentError.message);
+                  console.error(`[Webhook] Stack:`, fulfillmentError.stack);
+                  // NÃO falhar o webhook - pedido e email já foram criados com sucesso
+                }
+              } else {
+                console.log(`[Webhook] ⚠️ Credenciais de API não configuradas`);
+                console.log(`[Webhook] - shop_url: ${shopifyConfig.shop_url ? 'OK' : 'FALTANDO'}`);
+                console.log(`[Webhook] - api_access_token: ${shopifyConfig.api_access_token ? 'OK' : 'FALTANDO'}`);
+              }
+            } else {
+              console.log(`[Webhook] ℹ️ Auto-fulfill desativado pelo usuário`);
+            }
+
       return res.status(200).json({
         received: true,
         processed: true,

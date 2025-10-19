@@ -9,6 +9,10 @@ export interface ShopifyConfig {
   user_id: string;
   webhook_secret: string;
   shop_domain?: string;
+  shop_url?: string;              // NOVO: URL da loja para API Admin
+  api_access_token?: string;      // NOVO: Token da API Admin
+  auto_fulfill?: boolean;         // NOVO: Ativar fulfillment automático
+  tracking_company?: string;      // NOVO: Nome da transportadora
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -50,22 +54,34 @@ export async function getShopifyConfig(userId: string): Promise<ShopifyConfig | 
  * Salva ou atualiza configuração Shopify de um freelancer
  */
 export async function saveShopifyConfig(
-  userId: string, 
-  webhookSecret: string, 
-  shopDomain?: string
+  userId: string,
+  webhookSecret: string,
+  shopDomain?: string,
+  shopUrl?: string,              // NOVO: URL da loja
+  apiAccessToken?: string,       // NOVO: Token da API Admin
+  autoFulfill?: boolean,         // NOVO: Ativar fulfillment automático
+  trackingCompany?: string       // NOVO: Nome da transportadora
 ): Promise<boolean> {
   console.log(`[ShopifyConfig] Salvando configuração para usuário: ${userId}`);
   
   try {
+    const configData: any = {
+      user_id: userId,
+      webhook_secret: webhookSecret,
+      shop_domain: shopDomain,
+      is_active: true,
+      updated_at: new Date().toISOString()
+    };
+
+    // Adicionar campos opcionais apenas se fornecidos
+    if (shopUrl !== undefined) configData.shop_url = shopUrl;
+    if (apiAccessToken !== undefined) configData.api_access_token = apiAccessToken;
+    if (autoFulfill !== undefined) configData.auto_fulfill = autoFulfill;
+    if (trackingCompany !== undefined) configData.tracking_company = trackingCompany;
+
     const { error } = await supabaseAdmin
       .from('shopify_configs')
-      .upsert({
-        user_id: userId,
-        webhook_secret: webhookSecret,
-        shop_domain: shopDomain,
-        is_active: true,
-        updated_at: new Date().toISOString()
-      });
+      .upsert(configData);
 
     if (error) {
       console.error(`[ShopifyConfig] Erro ao salvar:`, error);
@@ -73,6 +89,9 @@ export async function saveShopifyConfig(
     }
 
     console.log(`[ShopifyConfig] ✅ Configuração salva com sucesso`);
+    if (shopUrl) console.log(`[ShopifyConfig] - Loja: ${shopUrl}`);
+    if (autoFulfill !== undefined) console.log(`[ShopifyConfig] - Auto-fulfill: ${autoFulfill}`);
+    
     return true;
   } catch (error) {
     console.error(`[ShopifyConfig] Erro inesperado ao salvar:`, error);

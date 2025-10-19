@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Correios - Encomenda Retida</title>
+  <style>
+    /* Reset simples */
+    body,table,td { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial; margin:0; padding:0; }
+    img { border:0; display:block; max-width:100%; height:auto; }
+    a { color:#003399; text-decoration:none; }
+
+    /* Container */
+    .email-wrap { background:#f4f6f8; padding:24px 12px; }
+    .email-card { max-width:640px; margin:0 auto; background:#ffffff; border-radius:8px; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,0.08); }
+
+    /* Header */
+    .header { background:#003399; color:#fff; padding:18px 20px; display:flex; align-items:center; gap:12px; }
+    .logo { width:140px; max-width:32%; }
+    .header h1 { font-size:18px; margin:0; font-weight:600; }
+
+    /* Body */
+    .body { padding:20px; color:#263238; line-height:1.45; }
+    .preline { font-size:13px; color:#55606a; margin-bottom:12px; }
+    .title { font-size:28px; margin:8px 0 16px; color:#003399; font-weight:bold; }
+    .card { background:#FFCC00; padding:14px; border-radius:6px; margin:12px 0; border:1px solid #e6e0b8; font-weight:bold; text-align:center; }
+
+    /* CTA */
+    .cta { display:inline-block; margin-top:14px; padding:12px 18px; background:#003399; color:#fff; border-radius:6px; font-weight:600; text-decoration:none; }
+    .muted { color:#6b7780; font-size:13px; }
+
+    /* Footer */
+    .footer { background:#f3f6f8; padding:16px 20px; font-size:13px; color:#6b7780; text-align:center; }
+    .small { font-size:12px; color:#98a0a6; }
+
+    /* Mobile */
+    @media (max-width:480px) {
+      .logo { width:110px; }
+      .header h1 { font-size:16px; }
+      .title { font-size:18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="email-wrap">
+    <div class="email-card" role="article" aria-label="Notificação de encomenda retida">
+      <!-- Header -->
+      <div class="header">
+        <!-- Logo oficial dos Correios - ATUALIZADA -->
+        <img class="logo" src="https://99prod.s3.amazonaws.com/uploads/1aaaf88e-415a-42b5-9fc5-f0b5b4b24acc/correios-logo-2.png" alt="Correios">
+        <h1>Aviso de Encomenda Retida</h1>
+      </div>
+
+      <!-- Body -->
+      <div class="body">
+        <p class="preline">Olá <strong>{{nome}}</strong>,</p>
+
+        <p class="title">Sua encomenda encontra-se retida para verificação</p>
+
+        <div class="card">
+          CPF DO TITULAR DA ENCOMENDA: <span>{{cpf}}</span>
+        </div>
+
+        <p>Detectamos que a sua encomenda precisa de atenção adicional antes da entrega. Para sua segurança, consulte diretamente o site oficial dos Correios.</p>
+
+        <p><strong>Ações recomendadas:</strong></p>
+        <ol>
+          <li>Acesse o rastreamento e confira os detalhes.</li>
+          <li>Verifique se há necessidade de documentação ou retirada.</li>
+          <li>Em caso de dúvida, entre em contato com uma agência próxima.</li>
+        </ol>
+
+        <div style="text-align:center; margin-top:20px;">
+          <a class="cta" href="https://rastreamentosedex.com/rastreamento" target="_blank" rel="noopener">Rastrear Encomenda</a>
+        </div>
+
+        <p class="muted" style="margin-top:12px;">Se você não reconhece essa encomenda, desconsidere esta mensagem.</p>
+
+        <hr style="border:none;border-top:1px solid #e6eef4;margin:16px 0;">
+
+        <p style="font-size:14px;"><strong> Correios Oficial</strong><br>
+      
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        <div style="margin-bottom:8px;">Empresa Brasileira de Correios e Telégrafos</div>
+        <div class="small">A NÃO REGULARIZAÇÃO PODERÁ NEGATIVAR SEU CPF.</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

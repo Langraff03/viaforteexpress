@@ -1,0 +1,141 @@
+
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>Nota Fiscal Eletrônica</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          margin: 0;
+          padding: 20px;
+          color: #333;
+        }
+        .invoice-container {
+          max-width: 800px;
+          margin: 0 auto;
+          border: 1px solid #ddd;
+          padding: 30px;
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .invoice-header {
+          text-align: center;
+          margin-bottom: 30px;
+          border-bottom: 2px solid #4f46e5;
+          padding-bottom: 20px;
+        }
+        .invoice-title {
+          font-size: 24px;
+          color: #4f46e5;
+          margin-bottom: 5px;
+        }
+        .invoice-info {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 30px;
+        }
+        .invoice-info-block {
+          flex: 1;
+        }
+        .invoice-info-title {
+          font-weight: bold;
+          margin-bottom: 5px;
+          color: #4f46e5;
+        }
+        .invoice-table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-bottom: 30px;
+        }
+        .invoice-table th {
+          background-color: #f8fafc;
+          padding: 10px;
+          text-align: left;
+          border-bottom: 2px solid #ddd;
+        }
+        .invoice-table td {
+          padding: 10px;
+          border-bottom: 1px solid #ddd;
+        }
+        .invoice-total {
+          text-align: right;
+          font-size: 18px;
+          font-weight: bold;
+          margin-top: 20px;
+          color: #4f46e5;
+        }
+        .barcode {
+          text-align: center;
+          margin: 20px 0;
+          padding: 10px;
+          background: #f8fafc;
+          border: 1px dashed #ddd;
+        }
+        .barcode-number {
+          font-family: monospace;
+          font-size: 14px;
+          letter-spacing: 2px;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="invoice-container">
+        <div class="invoice-header">
+          <div class="invoice-title">Nota Fiscal Eletrônica</div>
+          <div>NF-e Nº 236126696</div>
+        </div>
+
+        <div class="invoice-info">
+          <div class="invoice-info-block">
+            <div class="invoice-info-title">Dados do Cliente</div>
+            <div><strong>Nome:</strong> Cliente de Teste</div>
+            <div><strong>CPF/CNPJ:</strong> 123.456.789-00</div>
+            <div><strong>Endereço:</strong> Rua de Teste, 123, São Paulo - SP, 01234-567, Brasil</div>
+          </div>
+          <div class="invoice-info-block">
+            <div class="invoice-info-title">Dados da Venda</div>
+            <div><strong>Loja:</strong> Rapid Transporte</div>
+            <div><strong>Data de Emissão:</strong> 06/06/2025</div>
+            <div><strong>Código de Rastreio:</strong> TSTLKLVVQ</div>
+          </div>
+        </div>
+
+        <table class="invoice-table">
+          <thead>
+            <tr>
+              <th>Produto</th>
+              <th>Quantidade</th>
+              <th>Valor Unitário</th>
+              <th>Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Produto de Teste 1</td>
+              <td>1</td>
+              <td>R$ 99,90</td>
+              <td>R$ 99,90</td>
+            </tr>
+            <tr>
+              <td>Produto de Teste 2</td>
+              <td>2</td>
+              <td>R$ 50,00</td>
+              <td>R$ 100,00</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="invoice-total">
+          Total: R$ 199,90
+        </div>
+
+        <div class="barcode">
+          <div>Código de Autenticação</div>
+          <div class="barcode-number">
+            236126696TSTLKLVV0000019990
+          </div>
+        </div>
+      </div>
+    </body>
+    </html>
+  

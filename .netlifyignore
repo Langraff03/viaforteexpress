@@ -1,0 +1,19 @@
+# Ignorar arquivos do backend
+src/webhook-server/
+src/workers/
+src/scripts/
+
+# Ignorar arquivos de configuração do backend
+tsconfig.webhook.json
+tsconfig.workers.json
+
+# Ignorar arquivos de banco de dados
+supabase/
+
+# Ignorar arquivos de script de shell
+*.sh
+*.bat
+
+# Ignorar arquivos Docker
+Dockerfile
+docker-compose*

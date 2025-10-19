@@ -1,0 +1,16 @@
+[build]
+  command = "npm run build:frontend"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+# Adicione esta configuração para ignorar os arquivos do backend
+[build.processing.skip_processing]
+  skip_processing = true
+
+# Redirecionar todas as rotas para o index.html para suportar SPA
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

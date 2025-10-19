@@ -1,0 +1,27 @@
+[
+  {
+    "email": "lucaslangrafff@gmail.com",
+    "nome": "Lucas",
+    "oferta_interesse": "Produto Premium"
+  },
+  {
+    "email": "cliente1@exemplo.com",
+    "nome": "Cliente 1",
+    "oferta_interesse": "Serviço Express"
+  },
+  {
+    "email": "cliente2@exemplo.com",
+    "nome": "Cliente 2",
+    "oferta_interesse": "Produto Standard"
+  },
+  {
+    "email": "cliente3@exemplo.com",
+    "nome": "Cliente 3",
+    "oferta_interesse": "Serviço Premium"
+  },
+  {
+    "email": "cliente4@exemplo.com",
+    "nome": "Cliente 4",
+    "oferta_interesse": "Produto Economy"
+  }
+]

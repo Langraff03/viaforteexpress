@@ -4,12 +4,24 @@ import { Html, Head, Body, Container, Text, Link, Preview, Section, Hr, Img } fr
 export default function TrackingEmail({ name, trackingCode, orderId }: { name: string; trackingCode: string; orderId: string }) {
   // Função helper para obter a URL base de forma compatível
   function getBaseUrl(): string {
+<<<<<<< HEAD
     // Se estivermos no browser (frontend)
     if (typeof window !== 'undefined' && import.meta?.env) {
       return import.meta.env.VITE_APP_URL || 'https://rastreio.viaforteexpress.com';
     }
     // Se estivermos no Node.js (backend/workers)
     return process.env.VITE_APP_URL || process.env.APP_URL || 'https://rastreio.viaforteexpress.com';
+=======
+    // Se estivermos no Node.js (backend/workers) - sempre primeiro
+    if (typeof process !== 'undefined' && process.env) {
+      return process.env.VITE_APP_URL || process.env.APP_URL || 'https://rastreio.viaforteexpress.com';
+    }
+    // Se estivermos no browser (frontend) - fallback
+    if (typeof window !== 'undefined' && import.meta?.env) {
+      return import.meta.env.VITE_APP_URL || 'https://rastreio.viaforteexpress.com';
+    }
+    return 'https://rastreio.viaforteexpress.com';
+>>>>>>> 0f9b6501e96622621ca16e4187b05cd412977242
   }
   
   const baseUrl = getBaseUrl();

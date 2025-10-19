@@ -32,7 +32,10 @@ import FreelancerDashboard from './pages/FreelancerDashboard';
 import FreelancerOrders from './pages/FreelancerOrders';
 import FreelancerNewOrder from './pages/FreelancerNewOrder';
 import FreelancerShopifyConfig from './pages/FreelancerShopifyConfig';
+<<<<<<< HEAD
 import FreelancerCheckoutSettings from './pages/FreelancerCheckoutSettings';
+=======
+>>>>>>> 0f9b6501e96622621ca16e4187b05cd412977242
 
 // Client Pages
 import { ClientDashboard } from './pages/ClientDashboard';
@@ -124,10 +127,16 @@ function App() {
               <Route element={<FreelancerLayout><Outlet /></FreelancerLayout>}>
                  <Route index element={<Navigate to="/freelancer/dashboard" replace />} />
                 <Route path="dashboard" element={<FreelancerDashboard />} />
+<<<<<<< HEAD
                <Route path="orders" element={<FreelancerOrders />} />
                <Route path="new-order" element={<FreelancerNewOrder />} />
                <Route path="checkout-settings" element={<FreelancerCheckoutSettings />} />
                <Route path="shopify-config" element={<FreelancerShopifyConfig />} />
+=======
+                <Route path="orders" element={<FreelancerOrders />} />
+                <Route path="new-order" element={<FreelancerNewOrder />} />
+                <Route path="shopify-config" element={<FreelancerShopifyConfig />} />
+>>>>>>> 0f9b6501e96622621ca16e4187b05cd412977242
               </Route>
             </Route>
 

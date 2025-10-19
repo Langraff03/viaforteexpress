@@ -1,15 +1,5 @@
-// tsconfig.webhook.json
+// tsconfig.backend.json - Configuração específica para build do Railway
 {
-<<<<<<< HEAD
-  "extends": "./tsconfig.base.json",
-  "compilerOptions": {
-    "outDir": "dist/webhook-server"
-  },
-  "include": [
-    "src/webhook-server/**/*",
-    "src/lib/**/*",
-    "src/types/**/*"
-=======
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src",
@@ -22,7 +12,9 @@
     "jsx": "react-jsx",
     "allowJs": true,
     "strict": true,
-    "types": ["node"],
+    "types": ["node", "vite/client"],
+    // "allowImportingTsExtensions": true,
+    "declaration": false,
     "paths": {
       "@/*": ["./src/*"]
     }
@@ -32,17 +24,13 @@
     "src/lib/api.ts",
     "src/lib/auth.ts",
     "src/lib/domainHelpers.ts",
-    "src/lib/emailService.tsx",
     "src/lib/gateways/**/*",
-    "src/lib/invoiceService.tsx",
     "src/lib/payment.ts",
     "src/lib/queue.ts",
     "src/lib/shopifyConfig.ts",
     "src/lib/websocket-server.ts",
     "src/types/**/*",
     "src/routes/**/*",
-    "src/emails/TrackingEmail.backend.tsx",
-    "src/emails/OfferEmail.backend.tsx",
     "src/utils/errorHandling.js",
     "src/utils/events-polyfill.ts",
     "src/utils/format.ts",
@@ -50,6 +38,11 @@
     "src/utils/secureData.ts",
     "src/utils/tokenUtils.js",
     "src/utils/validation.js"
->>>>>>> 0f9b6501e96622621ca16e4187b05cd412977242
+  ],
+  "exclude": [
+    "src/lib/emailService.tsx",
+    "src/lib/supabaseClient.ts",
+    "src/utils/secureLogger.ts",
+    "src/lib/server/**/*"
   ]
 }

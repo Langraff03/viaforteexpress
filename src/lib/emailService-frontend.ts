@@ -9,7 +9,12 @@ function getEnvVar(name: string): string | undefined {
   if (typeof window !== 'undefined' && import.meta?.env) {
     return import.meta.env[`VITE_${name}`];
   }
+<<<<<<< HEAD
   return undefined;
+=======
+  // Fallback para Node.js (caso seja usado em backend)
+  return process.env[`VITE_${name}`] || process.env[name];
+>>>>>>> 0f9b6501e96622621ca16e4187b05cd412977242
 }
 
 /**

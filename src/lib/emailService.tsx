@@ -3,8 +3,13 @@
 import { Resend } from 'resend';
 import { renderAsync } from '@react-email/render';
 import { supabaseAdmin } from './server/supabaseAdmin'; // ✅ Backend seguro para workers
+<<<<<<< HEAD
 import TrackingEmail from '../emails/TrackingEmail';
 import OfferEmail from '../emails/OfferEmail';
+=======
+import TrackingEmail from '../emails/TrackingEmail.backend';
+import OfferEmail from '../emails/OfferEmail.backend';
+>>>>>>> 0f9b6501e96622621ca16e4187b05cd412977242
 import type { EmailDomain, ExtendedEmailConfig, ValidationResponse } from '../types';
 
 export type EmailConfig = {
@@ -16,6 +21,7 @@ export type EmailConfig = {
 
 // Função helper para obter variáveis de ambiente de forma compatível
 function getEnvVar(name: string): string | undefined {
+<<<<<<< HEAD
   // Se estivermos no browser (frontend)
   if (typeof window !== 'undefined' && import.meta?.env) {
     return import.meta.env[`VITE_${name}`];
@@ -23,6 +29,19 @@ function getEnvVar(name: string): string | undefined {
   // Se estivermos no Node.js (backend/workers)
   return process.env[`VITE_${name}`] || process.env[name];
 }
+=======
+  // Se estivermos no Node.js (backend/workers) - sempre primeiro
+  if (typeof process !== 'undefined' && process.env) {
+    return process.env[`VITE_${name}`] || process.env[name];
+  }
+  // Se estivermos no browser (frontend) - fallback
+  if (typeof window !== 'undefined' && import.meta?.env) {
+    return import.meta.env[`VITE_${name}`];
+  }
+  return undefined;
+}
+
+>>>>>>> 0f9b6501e96622621ca16e4187b05cd412977242
 export async function getEmailConfig(): Promise<EmailConfig> {
   console.log('🔧 [getEmailConfig] Lendo variáveis de ambiente:');
   console.log('  FROM_NAME:', getEnvVar('FROM_NAME'));
@@ -75,6 +94,7 @@ export async function getEmailConfig(): Promise<EmailConfig> {
   }
 }
 
+<<<<<<< HEAD
 /**
  * ✅ NOVA: Obter configuração de email específica para freelancers Adorei
  * Esta função usa uma chave Resend dedicada para freelancers com checkout Adorei
@@ -101,6 +121,8 @@ export async function getFreelancerAdoreiEmailConfig(): Promise<EmailConfig> {
   }
 }
 
+=======
+>>>>>>> 0f9b6501e96622621ca16e4187b05cd412977242
 // ==================== SISTEMA MULTI-DOMÍNIO EMAIL ====================
 
 /**
@@ -383,11 +405,22 @@ export async function sendOfferEmail(lead: {
 
     const html = await renderAsync(
       <OfferEmail
+<<<<<<< HEAD
         nome={lead.nome}
         oferta_nome={lead.oferta_nome}
         desconto={lead.desconto}
         link_da_oferta={lead.link_da_oferta}
         descricao_adicional={lead.descricao_adicional}
+=======
+        name={lead.nome}
+        productName={lead.oferta_nome}
+        productDescription={lead.descricao_adicional || 'Produto de alta qualidade'}
+        price={lead.desconto ? (parseFloat(lead.desconto) * 1.5).toFixed(2) : '99.90'}
+        discountPrice={lead.desconto || '49.90'}
+        productImage={''}
+        ctaUrl={lead.link_da_oferta}
+        unsubscribeUrl={`${process.env.APP_URL || 'https://viaforteexpress.com'}/unsubscribe`}
+>>>>>>> 0f9b6501e96622621ca16e4187b05cd412977242
       />
     );
 

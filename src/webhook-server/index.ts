@@ -5,10 +5,7 @@ import { createServer } from 'http';
 
 // import { assetWebhookHandler } from './handlers/asset'; // Will be replaced by generic
 import { genericWebhookHandler } from './handlers/genericWebhookHandler';
-<<<<<<< HEAD
 import { adoreiWebhookHandler, adoreiWebhookLogger } from './handlers/adorei';
-=======
->>>>>>> 0f9b6501e96622621ca16e4187b05cd412977242
 import {
   getConfig,
   saveConfig,
@@ -46,11 +43,7 @@ app.use(cors({
 // Permite JSON no body, and capture raw body for webhook signature validation
 app.use(express.json({
   limit: '50mb', // ✅ URGENTE: Aumentar limite para suportar 10K+ leads
-<<<<<<< HEAD
   verify: (req: Request & { rawBody?: Buffer }, res: Response, buf: Buffer, encoding: string) => {
-=======
-  verify: (req: Request & { rawBody?: Buffer }, res: Response, buf: Buffer, encoding: BufferEncoding) => {
->>>>>>> 0f9b6501e96622621ca16e4187b05cd412977242
     if (buf && buf.length) {
       req.rawBody = buf;
     }
@@ -58,7 +51,6 @@ app.use(express.json({
 }));
 
 
-<<<<<<< HEAD
 // ─── Adorei Webhook Handler ──────────────────────────────────────────────────
 // Este endpoint específico lida com webhooks da Adorei para freelancers
 // URL: /webhook/adorei/:freelancerId
@@ -68,8 +60,6 @@ app.post(
   adoreiWebhookHandler
 );
 
-=======
->>>>>>> 0f9b6501e96622621ca16e4187b05cd412977242
 // ─── Asset Webhook Handler ──────────────────────────────────────────────────
 // Este endpoint irá lidar com webhooks do gateway Asset.
 // O parâmetro :gatewayName deve ser 'asset'.

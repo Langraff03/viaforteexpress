@@ -5,7 +5,6 @@ import Redis from 'ioredis';
 import { supabaseAdmin } from '../lib/server/supabaseAdmin'; // ✅ Backend seguro
 import { queueEmail, generateTrackingCode } from '../lib/queue';
 import { generateInvoice } from '../lib/invoiceService';
-<<<<<<< HEAD
 import { sendTrackingEmail, getEmailConfigByDomain, getFreelancerAdoreiEmailConfig } from '../lib/emailService';
 import { GatewayUtils } from '../lib/gateways/GatewayUtils';
 import type {
@@ -13,10 +12,6 @@ import type {
   ProcessedAdoreiData,
   EmailTemplateVariables
 } from '../types/checkout';
-=======
-import { sendTrackingEmail } from '../lib/emailService';
-import { GatewayUtils } from '../lib/gateways/GatewayUtils';
->>>>>>> 0f9b6501e96622621ca16e4187b05cd412977242
 
 // Redis connection
 const connection = new Redis({
@@ -39,15 +34,12 @@ export interface PaymentWebhookJobData {
     gateway_id?: string;
     is_physical_product?: boolean;
     has_shipping_address?: boolean;
-<<<<<<< HEAD
     // Campos específicos para Adorei
     customer_phone?: string;
     customer_cpf?: string;
     freelancer_id?: string;
     freelancer_config?: FreelancerCheckoutConfig;
     processed_data?: ProcessedAdoreiData;
-=======
->>>>>>> 0f9b6501e96622621ca16e4187b05cd412977242
     shipping?: {
       address?: {
         street?: string;
@@ -71,7 +63,6 @@ export interface PaymentWebhookJobData {
   };
 }
 
-<<<<<<< HEAD
 /**
  * Processa template personalizado de email do freelancer
  */
@@ -356,8 +347,6 @@ async function processAdoreiFreelancerWebhook(jobData: PaymentWebhookJobData): P
   }
 }
 
-=======
->>>>>>> 0f9b6501e96622621ca16e4187b05cd412977242
 const paymentWebhookWorker = new Worker<PaymentWebhookJobData>(
   'payment-webhook',
   async (job: Job<PaymentWebhookJobData>) => {
@@ -365,20 +354,12 @@ const paymentWebhookWorker = new Worker<PaymentWebhookJobData>(
     const { gateway, event, payload } = job.data;
 
     console.log(`📦 🔍 DEBUG PAYMENT - ID: ${payload.id}`);
-<<<<<<< HEAD
     console.log(`📦 🔍 DEBUG PAYMENT - Gateway: ${gateway}`);
-=======
->>>>>>> 0f9b6501e96622621ca16e4187b05cd412977242
     console.log(`📦 🔍 DEBUG PAYMENT - Order ID: ${payload.order_id}`);
     console.log(`📦 🔍 DEBUG PAYMENT - Customer Email: ${payload.customer_email}`);
     console.log(`📦 🔍 DEBUG PAYMENT - Customer Name: ${payload.customer_name}`);
     console.log(`📦 🔍 DEBUG PAYMENT - Amount: ${payload.amount}`);
-<<<<<<< HEAD
     console.log(`📦 🔍 DEBUG PAYMENT - Freelancer ID: ${payload.freelancer_id}`);
-=======
-    console.log(`📦 🔍 DEBUG PAYMENT - Shipping Address:`, payload.shipping?.address);
-    console.log(`📦 🔍 DEBUG PAYMENT - Customer Address:`, payload.customer?.address);
->>>>>>> 0f9b6501e96622621ca16e4187b05cd412977242
 
     // Verificar se é um evento de pagamento confirmado
     if (event !== 'payment.confirmed') {
@@ -392,7 +373,6 @@ const paymentWebhookWorker = new Worker<PaymentWebhookJobData>(
       throw new Error('Dados de cliente ausentes no payload');
     }
 
-<<<<<<< HEAD
     // ✅ NOVO: Processamento específico para Adorei (freelancers)
     const isAdoreiWebhook = gateway === 'adorei' && payload.freelancer_id && payload.freelancer_config;
     
@@ -401,8 +381,6 @@ const paymentWebhookWorker = new Worker<PaymentWebhookJobData>(
       return await processAdoreiFreelancerWebhook(job.data);
     }
 
-=======
->>>>>>> 0f9b6501e96622621ca16e4187b05cd412977242
     // Verificar se o pedido tem endereço de entrega
     // ✅ CORREÇÃO: Manter compatibilidade com diferentes estruturas de endereço
     const payloadAny = payload as any; // Cast temporário para acessar estrutura real

@@ -1,14 +1,8 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-<<<<<<< HEAD
     "lib": ["ES2020"],
     "module": "CommonJS",
-=======
-    "lib": ["ES2020", "DOM"],
-    "module": "ES2020",
-    "types": ["vite/client"],
->>>>>>> 0f9b6501e96622621ca16e4187b05cd412977242
     "moduleResolution": "node",
     "esModuleInterop": true,
     "skipLibCheck": true,

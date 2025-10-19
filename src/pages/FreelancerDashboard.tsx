@@ -8,12 +8,8 @@ import {
   Mail,
   Clock,
   CheckCircle,
-<<<<<<< HEAD
   ArrowRight,
   Settings
-=======
-  ArrowRight
->>>>>>> 0f9b6501e96622621ca16e4187b05cd412977242
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek } from 'date-fns';
@@ -198,11 +194,7 @@ export default function FreelancerDashboard() {
             <h2 className="text-lg font-medium text-gray-900">Ações Rápidas</h2>
           </CardHeader>
           <CardContent>
-<<<<<<< HEAD
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-=======
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
->>>>>>> 0f9b6501e96622621ca16e4187b05cd412977242
               <Link
                 to="/freelancer/new-order"
                 className="flex items-center p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-emerald-500 hover:bg-emerald-50 transition-colors group"
@@ -242,7 +234,6 @@ export default function FreelancerDashboard() {
                 </div>
                 <ArrowRight className="w-5 h-5 text-gray-400 ml-auto group-hover:text-emerald-600" />
               </Link>
-<<<<<<< HEAD
 
               <Link
                 to="/freelancer/checkout-settings"
@@ -263,8 +254,6 @@ export default function FreelancerDashboard() {
                 </div>
                 <ArrowRight className="w-5 h-5 text-gray-400 ml-auto group-hover:text-emerald-600" />
               </Link>
-=======
->>>>>>> 0f9b6501e96622621ca16e4187b05cd412977242
             </div>
           </CardContent>
         </Card>

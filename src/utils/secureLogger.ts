@@ -5,13 +5,8 @@
  * possibilidade de rastreamento pelas autoridades.
  */
 
-<<<<<<< HEAD
 const isDevelopment = import.meta.env.DEV;
 const logsEnabled = import.meta.env.VITE_ENABLE_LOGS === 'true';
-=======
-const isDevelopment = import.meta.env?.DEV || process.env.NODE_ENV === 'development';
-const logsEnabled = (import.meta.env?.VITE_ENABLE_LOGS || process.env.VITE_ENABLE_LOGS) === 'true';
->>>>>>> 0f9b6501e96622621ca16e4187b05cd412977242
 
 export const secureLog = {
   /**

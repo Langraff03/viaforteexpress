@@ -288,6 +288,9 @@ export interface EmailTemplateVariables {
   company_name?: string;
   support_email?: string;
   from_name?: string;
+  items_summary?: string;
+  items_table_html?: string;
+  total_items?: number;
 }
 
 // ============================================================================

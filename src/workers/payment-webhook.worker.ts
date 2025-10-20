@@ -13,6 +13,64 @@ import type {
   EmailTemplateVariables
 } from '../types/checkout';
 
+interface OrderItemRecord {
+  product_name: string;
+  quantity: number;
+  unit_price: number;
+}
+
+const formatCurrency = (valueInCents: number | null | undefined): string => {
+  const amount = (valueInCents ?? 0) / 100;
+  return amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+};
+
+const escapeHtml = (value: string): string => {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+};
+
+const buildItemsSummary = (items: OrderItemRecord[] | null | undefined): string => {
+  if (!items || items.length === 0) {
+    return '';
+  }
+
+  return items
+    .map((item) => {
+      const name = escapeHtml(item.product_name || 'Produto');
+      const quantity = item.quantity || 0;
+      const lineTotal = (item.unit_price || 0) * quantity;
+      return `${name} (x${quantity}) - ${formatCurrency(lineTotal)}`;
+    })
+    .join('; ');
+};
+
+const buildItemsTableHtml = (items: OrderItemRecord[] | null | undefined): string => {
+  if (!items || items.length === 0) {
+    return '';
+  }
+
+  const header = `<thead><tr><th style="text-align:left;padding:8px;border-bottom:1px solid #e5e7eb;">Produto</th><th style="text-align:right;padding:8px;border-bottom:1px solid #e5e7eb;">Qtde</th><th style="text-align:right;padding:8px;border-bottom:1px solid #e5e7eb;">Valor</th></tr></thead>`;
+
+  const rows = items
+    .map((item) => {
+      const name = escapeHtml(item.product_name || 'Produto');
+      const quantity = item.quantity || 0;
+      const lineTotal = (item.unit_price || 0) * quantity;
+      return `<tr>
+        <td style="padding:8px;border-bottom:1px solid #f1f5f9;">${name}</td>
+        <td style="padding:8px;border-bottom:1px solid #f1f5f9;text-align:right;">${quantity}</td>
+        <td style="padding:8px;border-bottom:1px solid #f1f5f9;text-align:right;">${formatCurrency(lineTotal)}</td>
+      </tr>`;
+    })
+    .join('');
+
+  return `<table style="width:100%;border-collapse:collapse;margin-top:16px;">${header}<tbody>${rows}</tbody></table>`;
+};
+
 // Redis connection
 const connection = new Redis({
   host: process.env.REDIS_HOST || 'localhost',
@@ -100,6 +158,27 @@ async function sendFreelancerEmail(
       
     console.log(`📧 [Freelancer] Usando configuração de email: ${emailConfig.fromEmail} (domínio: ${config.email_domain_id ? 'personalizado' : 'padrão freelancer'})`);
     
+    let itemsSummary = '';
+    let itemsTableHtml = '';
+    let totalItemsCount = 0;
+
+    try {
+      const { data: orderItems, error: orderItemsError } = await supabaseAdmin
+        .from('order_items')
+        .select('product_name, quantity, unit_price')
+        .eq('order_id', orderData.id);
+
+      if (orderItemsError) {
+        console.error('[Freelancer] Falha ao buscar itens do pedido:', orderItemsError);
+      } else if (orderItems && orderItems.length > 0) {
+        totalItemsCount = orderItems.reduce((acc, item) => acc + (item.quantity || 0), 0);
+        itemsSummary = buildItemsSummary(orderItems);
+        itemsTableHtml = buildItemsTableHtml(orderItems);
+      }
+    } catch (itemsErr) {
+      console.error('[Freelancer] Excecao ao processar itens do pedido:', itemsErr);
+    }
+
     const variables: EmailTemplateVariables = {
       customer_name: orderData.customer_name,
       tracking_code: trackingCode,
@@ -111,7 +190,10 @@ async function sendFreelancerEmail(
       tracking_url: `${process.env.VITE_APP_URL || 'https://rastreio.viaforteexpress.com'}/tracking/${trackingCode}`,
       company_name: config.from_name || emailConfig.fromName,
       support_email: config.reply_to_email || emailConfig.replyToEmail,
-      from_name: config.from_name || emailConfig.fromName
+      from_name: config.from_name || emailConfig.fromName,
+      items_summary: itemsSummary,
+      items_table_html: itemsTableHtml,
+      total_items: totalItemsCount
     };
 
     let emailContent: string;
